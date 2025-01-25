@@ -3,8 +3,27 @@ import sounddevice as sd
 import numpy as np
 import asyncio
 import platform
+import sys
 
-print("Game is loading...")  # Add this at the start of the file
+print("Game is loading...")
+
+# Check if we're running in the browser
+IS_WEB = platform.system() == 'Emscripten'
+
+# Initialize Pygame with special flags for web
+pygame.init()
+if IS_WEB:
+    import platform
+    import asyncio
+    from pygame.display import set_mode, flip
+    CANVAS_WIDTH = 500
+    CANVAS_HEIGHT = 500
+    screen = set_mode((CANVAS_WIDTH, CANVAS_HEIGHT), flags=pygame.SRCALPHA)
+else:
+    screen = pygame.display.set_mode((500, 500))
+
+pygame.display.set_caption("Blow Out the Candle!")
+clock = pygame.time.Clock()
 
 # Function to draw the cake and candle
 def draw_cake(screen, candle_lit):
@@ -87,53 +106,44 @@ async def request_microphone_permission():
 
 # Main function to run the program
 async def main():
-    pygame.init()
-    screen = pygame.display.set_mode((500, 500))
-    pygame.display.set_caption("Blow Out the Candle!")
+    print("Main function started...")
     clock = pygame.time.Clock()
-
-    # Request microphone permission at start
-    print("Starting game...")
-    permission_granted = await request_microphone_permission()
-    if not permission_granted:
-        print("Microphone permission denied!")
-        # Show a message on screen about needing microphone permission
-        font = pygame.font.Font(None, 36)
-        text = font.render("Please allow microphone access!", True, (255, 0, 0))
-        screen.blit(text, (50, 200))
-        pygame.display.flip()
-        await asyncio.sleep(3)
-        return
-
     candle_lit = True
     running = True
 
     while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            # Add mouse click to also blow out candle (for testing)
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                candle_lit = False
+        if IS_WEB:
+            # Web-specific event handling
+            events = pygame.event.get()
+            for event in events:
+                if event.type == pygame.QUIT:
+                    running = False
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    candle_lit = False
+                    print("Candle blown out by click!")
+        else:
+            # Desktop event handling
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    candle_lit = False
 
-        # Draw the cake and candle
+        # Draw the cake
         draw_cake(screen, candle_lit)
-
-        # Check for blow detection
-        if candle_lit:
-            if await detect_blow(threshold=2, duration=0.5):  # Made more sensitive
-                candle_lit = False
-                # Show success message
-                font = pygame.font.Font(None, 36)
-                text = font.render("You did it! 🎉", True, (255, 0, 0))
-                screen.blit(text, (180, 150))
-                pygame.display.flip()
-
+        
+        if IS_WEB:
+            await asyncio.sleep(0)  # Let the browser breathe
+        
         clock.tick(30)
-        await asyncio.sleep(0)  # Required for web version
 
     pygame.quit()
 
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    if IS_WEB:
+        print("Running in web mode...")
+        asyncio.run(main())
+    else:
+        print("Running in desktop mode...")
+        asyncio.run(main())

@@ -17,35 +17,72 @@
         }
         #canvas {
             border: 2px solid #333;
-            max-width: 100%;
-            height: auto;
+            max-width: 500px;
+            height: 500px;
+            background: white;
         }
         #status {
             margin-top: 20px;
             font-family: Arial, sans-serif;
+        }
+        .controls {
+            margin-top: 20px;
+            text-align: center;
         }
     </style>
     <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
 </head>
 <body>
     <div id="status">Loading...</div>
-    <canvas id="canvas" oncontextmenu="event.preventDefault()" tabindex="1"></canvas>
+    <canvas id="canvas" width="500" height="500"></canvas>
+    <div class="controls">
+        <button onclick="blowCandle()">Click to Blow!</button>
+    </div>
     <script type="text/javascript">
-        async function main() {
-            let pyodide = await loadPyodide();
-            await pyodide.loadPackage("pygame");
-            await pyodide.runPythonAsync(`
-                from pyodide.http import pyfetch
-                response = await pyfetch("blow_candle.py")
-                with open("blow_candle.py", "w") as f:
-                    f.write(await response.text())
-            `);
-            await pyodide.runPythonAsync(`
-                import blow_candle
-                await blow_candle.main()
-            `);
+        let pyodide;
+        
+        async function init() {
+            console.log("Initializing...");
+            document.getElementById('status').textContent = "Loading Python...";
+            
+            try {
+                pyodide = await loadPyodide();
+                document.getElementById('status').textContent = "Loading Pygame...";
+                await pyodide.loadPackage(["pygame"]);
+                
+                document.getElementById('status').textContent = "Loading game...";
+                await pyodide.runPythonAsync(`
+                    from pyodide.http import pyfetch
+                    response = await pyfetch("blow_candle.py")
+                    with open("blow_candle.py", "w") as f:
+                        f.write(await response.text())
+                `);
+                
+                document.getElementById('status').textContent = "Starting game...";
+                await pyodide.runPythonAsync(`
+                    import blow_candle
+                    await blow_candle.main()
+                `);
+                
+                document.getElementById('status').textContent = "Game ready!";
+            } catch (error) {
+                console.error("Error:", error);
+                document.getElementById('status').textContent = "Error loading game: " + error.message;
+            }
         }
-        main();
+
+        async function blowCandle() {
+            try {
+                await pyodide.runPythonAsync(`
+                    import pygame
+                    pygame.event.post(pygame.event.Event(pygame.MOUSEBUTTONDOWN))
+                `);
+            } catch (error) {
+                console.error("Error blowing candle:", error);
+            }
+        }
+
+        init();
     </script>
 </body>
 </html> 
