@@ -71,6 +71,9 @@
                 microphoneActive = true;
                 document.querySelector('button').style.display = 'none';
                 
+                // Start the music when microphone permission is granted
+                startAudio();
+                
                 // Start monitoring microphone input
                 function checkAudio() {
                 if (!candleLit || !microphoneActive) return;
@@ -90,9 +93,6 @@
 }
                 
                 checkAudio();
-                
-                // Start playing music after mic permission
-                audio.play().catch(e => console.log('Audio play failed:', e));
                 
             } catch (error) {
                 console.error('Error accessing microphone:', error);
@@ -165,11 +165,94 @@
         // Start the animation
         animate();
 
-        // Add background music
-        const audio = new Audio('data:audio/mp3;base64,' + 
-            'SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAAFKgDMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzM//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAAAQUqxQ8xCQAAAAAAAAAAAAAAAAAAAP/7kGQAAANUAEn1AAAIxoBJPqAAAQAAAaQAAAAgAAA0gAAABAAABpAAAACAAADSAAAAEMXDms33Dg4ODg4vqx8fH+Dg4Pj/B8H4Ph8H4f4Pg+D4Pw+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+AAH4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4');
-        
-        audio.loop = true;
+        // Web Audio API setup
+        let isPlaying = false;
+
+        function playBirthdayTune() {
+            if (isPlaying) return; // Prevent multiple plays
+            
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            isPlaying = true;
+
+            const notes = [
+                { note: 'C4', duration: 0.5 }, // Hap
+                { note: 'C4', duration: 0.5 }, // py
+                { note: 'D4', duration: 1.0 }, // Birth
+                { note: 'C4', duration: 1.0 }, // day
+                { note: 'F4', duration: 1.0 }, // to
+                { note: 'E4', duration: 1.5 }, // you
+                
+                { note: 'C4', duration: 0.5 }, // Hap
+                { note: 'C4', duration: 0.5 }, // py
+                { note: 'D4', duration: 1.0 }, // Birth
+                { note: 'C4', duration: 1.0 }, // day
+                { note: 'G4', duration: 1.0 }, // to
+                { note: 'F4', duration: 1.5 }, // you
+                
+                { note: 'C4', duration: 0.5 }, // Hap
+                { note: 'C4', duration: 0.5 }, // py
+                { note: 'C5', duration: 1.0 }, // Birth
+                { note: 'A4', duration: 1.0 }, // day
+                { note: 'F4', duration: 1.0 }, // dear
+                { note: 'E4', duration: 1.0 }, // [name]
+                { note: 'D4', duration: 1.0 }, // [name]
+                
+                { note: 'B4', duration: 0.5 }, // Hap
+                { note: 'B4', duration: 0.5 }, // py
+                { note: 'A4', duration: 1.0 }, // Birth
+                { note: 'F4', duration: 1.0 }, // day
+                { note: 'G4', duration: 1.0 }, // to
+                { note: 'F4', duration: 2.0 }  // you
+            ];
+            
+            let time = audioContext.currentTime;
+            
+            notes.forEach(note => {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.value = getNoteFrequency(note.note);
+                
+                gainNode.gain.setValueAtTime(0.3, time); // Reduced volume to 0.3
+                gainNode.gain.exponentialRampToValueAtTime(0.01, time + note.duration);
+                
+                oscillator.start(time);
+                oscillator.stop(time + note.duration);
+                
+                time += note.duration * 0.5; // Adjusted timing to play faster
+            });
+
+            // Restart the tune when it finishes
+            setTimeout(() => {
+                isPlaying = false;
+                if (candleLit) { // Only replay if candle is still lit
+                    playBirthdayTune();
+                }
+            }, time * 1000);
+        }
+
+        function getNoteFrequency(note) {
+            const notes = {
+                'C4': 261.63,
+                'D4': 293.66,
+                'E4': 329.63,
+                'F4': 349.23,
+                'G4': 392.00,
+                'A4': 440.00,
+                'B4': 493.88,
+                'C5': 523.25
+            };
+            return notes[note];
+        }
+
+        // Replace the old startAudio function with this:
+        function startAudio() {
+            playBirthdayTune();
+        }
     </script>
 </body>
 </html>
