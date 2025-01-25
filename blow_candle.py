@@ -4,6 +4,7 @@ import numpy as np
 import asyncio
 import platform
 
+print("Game is loading...")  # Add this at the start of the file
 
 # Function to draw the cake and candle
 def draw_cake(screen, candle_lit):

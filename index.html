@@ -25,10 +25,27 @@
             font-family: Arial, sans-serif;
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
 </head>
 <body>
     <div id="status">Loading...</div>
     <canvas id="canvas" oncontextmenu="event.preventDefault()" tabindex="1"></canvas>
-    <script src="blow_candle.js" defer></script>
+    <script type="text/javascript">
+        async function main() {
+            let pyodide = await loadPyodide();
+            await pyodide.loadPackage("pygame");
+            await pyodide.runPythonAsync(`
+                from pyodide.http import pyfetch
+                response = await pyfetch("blow_candle.py")
+                with open("blow_candle.py", "w") as f:
+                    f.write(await response.text())
+            `);
+            await pyodide.runPythonAsync(`
+                import blow_candle
+                await blow_candle.main()
+            `);
+        }
+        main();
+    </script>
 </body>
 </html> 
