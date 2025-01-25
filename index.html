@@ -75,22 +75,17 @@
                     analyser.getByteFrequencyData(dataArray);
                     const average = dataArray.reduce((a, b) => a + b) / bufferLength;
                     
-                    // Increase threshold and add minimum duration for blow detection
-                    if (average > 50) {  // Increased from 20 to 50
-                        // Only count as a blow if the sound is sustained
-                        setTimeout(() => {
-                            analyser.getByteFrequencyData(dataArray);
-                            const newAverage = dataArray.reduce((a, b) => a + b) / bufferLength;
-                            if (newAverage > 50) {  // Check if still blowing
-                                console.log('Blow detected! Volume:', average);
-                                blowOutCandle();
-                                microphoneActive = false;
-                                mediaStream.getTracks().forEach(track => track.stop());
-                            } else {
-                                requestAnimationFrame(checkAudio);
-                            }
-                        }, 200);  // Wait 200ms to confirm it's a real blow
+                    // Debug: show current volume level
+                    console.log('Current volume:', average);
+                    
+                    // Check for sudden changes in volume
+                    if (average > 30 || (average > 20 && average < previousAverage * 0.5)) {
+                        console.log('Blow detected! Volume:', average);
+                        blowOutCandle();
+                        microphoneActive = false;
+                        mediaStream.getTracks().forEach(track => track.stop());
                     } else {
+                        previousAverage = average;
                         requestAnimationFrame(checkAudio);
                     }
                 }
