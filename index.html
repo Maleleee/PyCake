@@ -13,13 +13,22 @@
             align-items: center;
             min-height: 100vh;
             background-color: #f0f0f0;
+            flex-direction: column;
         }
         #canvas {
             border: 2px solid #333;
+            max-width: 100%;
+            height: auto;
+        }
+        #status {
+            margin-top: 20px;
+            font-family: Arial, sans-serif;
         }
     </style>
 </head>
 <body>
-    <canvas id="canvas"></canvas>
+    <div id="status">Loading...</div>
+    <canvas id="canvas" oncontextmenu="event.preventDefault()" tabindex="1"></canvas>
+    <script src="blow_candle.js" defer></script>
 </body>
 </html> 
