@@ -20,235 +20,232 @@
             border: 2px solid #333;
             background: white;
         }
-        #controls {
-            margin-top: 20px;
+        .message {
+            position: fixed;
+            top: 20px;
             text-align: center;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #ff69b4;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #ff1493;
+            color: #ff69b4;
+            font-size: 18px;
         }
     </style>
 </head>
 <body>
+    <div class="message">Click anywhere to start! 🎂</div>
     <canvas id="gameCanvas" width="500" height="500"></canvas>
-</body>
 
-<script>
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    let candleLit = true;
-    let flameOffset = 0;
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        let candleLit = true;
+        let flameOffset = 0;
 
-    let audioContext;
-    let mediaStream;
-    let microphoneActive = false;
+        let audioContext;
+        let mediaStream;
+        let microphoneActive = false;
 
-    window.onload = async function() {
-        try {
-            // Create and resume audio context first
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            await audioContext.resume();
+        // Start everything when user clicks
+        document.addEventListener('click', async function startEverything() {
+            document.querySelector('.message').style.display = 'none';
+            
+            try {
+                // Create and resume audio context
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                await audioContext.resume();
 
-            // Request microphone access automatically
-            mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            const microphone = audioContext.createMediaStreamSource(mediaStream);
-            const analyser = audioContext.createAnalyser();
-            
-            microphone.connect(analyser);
-            analyser.fftSize = 256;
-            
-            const bufferLength = analyser.frequencyBinCount;
-            const dataArray = new Uint8Array(bufferLength);
-            
-            microphoneActive = true;
-            
-            // Start the music immediately
-            startAudio();
-            
-            // Start monitoring microphone input
-            function checkAudio() {
-                if (!candleLit || !microphoneActive) return;
-
-                analyser.getByteFrequencyData(dataArray);
-                const average = dataArray.reduce((a, b) => a + b) / bufferLength;
+                // Request microphone access
+                mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const microphone = audioContext.createMediaStreamSource(mediaStream);
+                const analyser = audioContext.createAnalyser();
                 
-                if (average > 20) {
-                    console.log('Blow detected! Volume:', average);
-                    blowOutCandle();
-                    microphoneActive = false;
-                    mediaStream.getTracks().forEach(track => track.stop());
-                } else {
-                    requestAnimationFrame(checkAudio);
+                microphone.connect(analyser);
+                analyser.fftSize = 256;
+                
+                const bufferLength = analyser.frequencyBinCount;
+                const dataArray = new Uint8Array(bufferLength);
+                
+                microphoneActive = true;
+                
+                // Start the music
+                startAudio();
+                
+                // Monitor microphone
+                function checkAudio() {
+                    if (!candleLit || !microphoneActive) return;
+
+                    analyser.getByteFrequencyData(dataArray);
+                    const average = dataArray.reduce((a, b) => a + b) / bufferLength;
+                    
+                    if (average > 20) {
+                        console.log('Blow detected! Volume:', average);
+                        blowOutCandle();
+                        microphoneActive = false;
+                        mediaStream.getTracks().forEach(track => track.stop());
+                    } else {
+                        requestAnimationFrame(checkAudio);
+                    }
                 }
+                
+                checkAudio();
+                
+                // Remove this listener after first click
+                document.removeEventListener('click', startEverything);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Please allow microphone access to play the game!');
             }
-            
-            checkAudio();
-            
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Please allow microphone access to play the game!');
-        }
-    };
-
-    function drawCake() {
-        // Clear canvas
-        ctx.fillStyle = 'white';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // Draw cake layers (pink gradient)
-        ctx.fillStyle = '#FFB6C1';  // Light pink
-        ctx.fillRect(150, 300, 200, 100);  // Bottom layer
-        
-        ctx.fillStyle = '#FFC0CB';  // Pink
-        ctx.fillRect(170, 250, 160, 50);   // Middle layer
-        
-        ctx.fillStyle = '#FFD7D9';  // Lighter pink
-        ctx.fillRect(190, 220, 120, 30);   // Top layer
-
-        // Draw decorative sprinkles
-        for (let i = 0; i < 20; i++) {
-            ctx.beginPath();
-            const x = Math.random() * 200 + 150;
-            const y = Math.random() * 180 + 220;
-            ctx.fillStyle = ['white', '#FF69B4', '#FFE4E1'][Math.floor(Math.random() * 3)];
-            ctx.arc(x, y, 3, 0, Math.PI * 2);
-            ctx.fill();
-        }
-
-        // Draw candle
-        ctx.fillStyle = '#FFB6C1';
-        ctx.fillRect(240, 170, 20, 50);
-        
-        // Draw flame if candle is lit
-        if (candleLit) {
-            flameOffset = Math.sin(Date.now() * 0.01) * 3;
-            
-            // Outer flame
-            ctx.fillStyle = '#FFA500';
-            ctx.beginPath();
-            ctx.ellipse(250, 140 + flameOffset, 20, 20, 0, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Inner flame
-            ctx.fillStyle = '#FFD700';
-            ctx.beginPath();
-            ctx.ellipse(250, 145 + flameOffset, 15, 15, 0, 0, Math.PI * 2);
-            ctx.fill();
-        } else {
-            // If candle is not lit, show celebration message
-            ctx.fillStyle = '#FF1493';
-            ctx.font = '36px Arial';
-            ctx.fillText('Happy Birthday! 🎉', 150, 150);
-        }
-    }
-
-    function blowOutCandle() {
-        candleLit = false;
-    }
-
-    // Animation loop
-    function animate() {
-        drawCake();
-        requestAnimationFrame(animate);
-    }
-
-    // Start the animation
-    animate();
-
-    // Web Audio API setup
-    let isPlaying = false;
-
-    function playBirthdayTune() {
-        if (isPlaying) return;
-        
-        isPlaying = true;
-        
-        const notes = [
-            { note: 'C4', duration: 0.5 }, // Hap
-            { note: 'C4', duration: 0.5 }, // py
-            { note: 'D4', duration: 1.0 }, // Birth
-            { note: 'C4', duration: 1.0 }, // day
-            { note: 'F4', duration: 1.0 }, // to
-            { note: 'E4', duration: 1.5 }, // you
-            
-            { note: 'C4', duration: 0.5 }, // Hap
-            { note: 'C4', duration: 0.5 }, // py
-            { note: 'D4', duration: 1.0 }, // Birth
-            { note: 'C4', duration: 1.0 }, // day
-            { note: 'G4', duration: 1.0 }, // to
-            { note: 'F4', duration: 1.5 }, // you
-            
-            { note: 'C4', duration: 0.5 }, // Hap
-            { note: 'C4', duration: 0.5 }, // py
-            { note: 'C5', duration: 1.0 }, // Birth
-            { note: 'A4', duration: 1.0 }, // day
-            { note: 'F4', duration: 1.0 }, // dear
-            { note: 'E4', duration: 1.0 }, // [name]
-            { note: 'D4', duration: 1.0 }, // [name]
-            
-            { note: 'B4', duration: 0.5 }, // Hap
-            { note: 'B4', duration: 0.5 }, // py
-            { note: 'A4', duration: 1.0 }, // Birth
-            { note: 'F4', duration: 1.0 }, // day
-            { note: 'G4', duration: 1.0 }, // to
-            { note: 'F4', duration: 2.0 }  // you
-        ];
-        
-        let time = audioContext.currentTime;
-        
-        notes.forEach(note => {
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            oscillator.type = 'square';
-            oscillator.frequency.value = getNoteFrequency(note.note);
-            
-            gainNode.gain.setValueAtTime(0.5, time);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, time + note.duration);
-            
-            oscillator.start(time);
-            oscillator.stop(time + note.duration);
-            
-            time += note.duration * 0.3;
         });
 
-        setTimeout(() => {
-            isPlaying = false;
-            if (candleLit) {
-                playBirthdayTune();
+        function drawCake() {
+            // Clear canvas
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw cake layers (pink gradient)
+            ctx.fillStyle = '#FFB6C1';  // Light pink
+            ctx.fillRect(150, 300, 200, 100);  // Bottom layer
+            
+            ctx.fillStyle = '#FFC0CB';  // Pink
+            ctx.fillRect(170, 250, 160, 50);   // Middle layer
+            
+            ctx.fillStyle = '#FFD7D9';  // Lighter pink
+            ctx.fillRect(190, 220, 120, 30);   // Top layer
+
+            // Draw decorative sprinkles
+            for (let i = 0; i < 20; i++) {
+                ctx.beginPath();
+                const x = Math.random() * 200 + 150;
+                const y = Math.random() * 180 + 220;
+                ctx.fillStyle = ['white', '#FF69B4', '#FFE4E1'][Math.floor(Math.random() * 3)];
+                ctx.arc(x, y, 3, 0, Math.PI * 2);
+                ctx.fill();
             }
-        }, time * 800);
-    }
 
-    function getNoteFrequency(note) {
-        const notes = {
-            'C4': 261.63,
-            'D4': 293.66,
-            'E4': 329.63,
-            'F4': 349.23,
-            'G4': 392.00,
-            'A4': 440.00,
-            'B4': 493.88,
-            'C5': 523.25
-        };
-        return notes[note];
-    }
+            // Draw candle
+            ctx.fillStyle = '#FFB6C1';
+            ctx.fillRect(240, 170, 20, 50);
+            
+            // Draw flame if candle is lit
+            if (candleLit) {
+                flameOffset = Math.sin(Date.now() * 0.01) * 3;
+                
+                // Outer flame
+                ctx.fillStyle = '#FFA500';
+                ctx.beginPath();
+                ctx.ellipse(250, 140 + flameOffset, 20, 20, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Inner flame
+                ctx.fillStyle = '#FFD700';
+                ctx.beginPath();
+                ctx.ellipse(250, 145 + flameOffset, 15, 15, 0, 0, Math.PI * 2);
+                ctx.fill();
+            } else {
+                // If candle is not lit, show celebration message
+                ctx.fillStyle = '#FF1493';
+                ctx.font = '36px Arial';
+                ctx.fillText('Happy Birthday! 🎉', 150, 150);
+            }
+        }
 
-    // Replace the old startAudio function with this:
-    function startAudio() {
-        playBirthdayTune();
-    }
-</script>
+        function blowOutCandle() {
+            candleLit = false;
+        }
+
+        // Animation loop
+        function animate() {
+            drawCake();
+            requestAnimationFrame(animate);
+        }
+
+        // Start the animation immediately
+        animate();
+
+        // Web Audio API setup
+        let isPlaying = false;
+
+        function playBirthdayTune() {
+            if (isPlaying) return;
+            
+            isPlaying = true;
+            
+            const notes = [
+                { note: 'C4', duration: 0.5 }, // Hap
+                { note: 'C4', duration: 0.5 }, // py
+                { note: 'D4', duration: 1.0 }, // Birth
+                { note: 'C4', duration: 1.0 }, // day
+                { note: 'F4', duration: 1.0 }, // to
+                { note: 'E4', duration: 1.5 }, // you
+                
+                { note: 'C4', duration: 0.5 }, // Hap
+                { note: 'C4', duration: 0.5 }, // py
+                { note: 'D4', duration: 1.0 }, // Birth
+                { note: 'C4', duration: 1.0 }, // day
+                { note: 'G4', duration: 1.0 }, // to
+                { note: 'F4', duration: 1.5 }, // you
+                
+                { note: 'C4', duration: 0.5 }, // Hap
+                { note: 'C4', duration: 0.5 }, // py
+                { note: 'C5', duration: 1.0 }, // Birth
+                { note: 'A4', duration: 1.0 }, // day
+                { note: 'F4', duration: 1.0 }, // dear
+                { note: 'E4', duration: 1.0 }, // [name]
+                { note: 'D4', duration: 1.0 }, // [name]
+                
+                { note: 'B4', duration: 0.5 }, // Hap
+                { note: 'B4', duration: 0.5 }, // py
+                { note: 'A4', duration: 1.0 }, // Birth
+                { note: 'F4', duration: 1.0 }, // day
+                { note: 'G4', duration: 1.0 }, // to
+                { note: 'F4', duration: 2.0 }  // you
+            ];
+            
+            let time = audioContext.currentTime;
+            
+            notes.forEach(note => {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.type = 'square';
+                oscillator.frequency.value = getNoteFrequency(note.note);
+                
+                gainNode.gain.setValueAtTime(0.5, time);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, time + note.duration);
+                
+                oscillator.start(time);
+                oscillator.stop(time + note.duration);
+                
+                time += note.duration * 0.3;
+            });
+
+            setTimeout(() => {
+                isPlaying = false;
+                if (candleLit) {
+                    playBirthdayTune();
+                }
+            }, time * 800);
+        }
+
+        function getNoteFrequency(note) {
+            const notes = {
+                'C4': 261.63,
+                'D4': 293.66,
+                'E4': 329.63,
+                'F4': 349.23,
+                'G4': 392.00,
+                'A4': 440.00,
+                'B4': 493.88,
+                'C5': 523.25
+            };
+            return notes[note];
+        }
+
+        function startAudio() {
+            playBirthdayTune();
+        }
+    </script>
+</body>
 </html>
