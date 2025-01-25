@@ -42,6 +42,7 @@
         let audioContext;
         let mediaStream;
         let microphoneActive = false;
+        let previousAverage = 0;
 
         // Start everything when user clicks
         document.addEventListener('click', async function startEverything() {
@@ -78,14 +79,13 @@
                     // Debug: show current volume level
                     console.log('Current volume:', average);
                     
-                    // Check for sudden changes in volume
-                    if (average > 30 || (average > 20 && average < previousAverage * 0.5)) {
+                    // Simple threshold check
+                    if (average > 35) {  // Using a simple threshold
                         console.log('Blow detected! Volume:', average);
                         blowOutCandle();
                         microphoneActive = false;
                         mediaStream.getTracks().forEach(track => track.stop());
                     } else {
-                        previousAverage = average;
                         requestAnimationFrame(checkAudio);
                     }
                 }
