@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blow Out the Candle</title>
+    <title>Happy birthday, Aki!</title>
     <style>
         body {
             margin: 0;
@@ -14,75 +14,116 @@
             min-height: 100vh;
             background-color: #f0f0f0;
             flex-direction: column;
-        }
-        #canvas {
-            border: 2px solid #333;
-            max-width: 500px;
-            height: 500px;
-            background: white;
-        }
-        #status {
-            margin-top: 20px;
             font-family: Arial, sans-serif;
         }
-        .controls {
+        #gameCanvas {
+            border: 2px solid #333;
+            background: white;
+        }
+        #controls {
             margin-top: 20px;
             text-align: center;
         }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #ff69b4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #ff1493;
+        }
     </style>
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
 </head>
 <body>
-    <div id="status">Loading...</div>
-    <canvas id="canvas" width="500" height="500"></canvas>
-    <div class="controls">
-        <button onclick="blowCandle()">Click to Blow!</button>
+    <canvas id="gameCanvas" width="500" height="500"></canvas>
+    <div id="controls">
+        <button onclick="blowOutCandle()">Blow Out Candle! 🎂</button>
     </div>
-    <script type="text/javascript">
-        let pyodide;
-        
-        async function init() {
-            console.log("Initializing...");
-            document.getElementById('status').textContent = "Loading Python...";
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        let candleLit = true;
+        let flameOffset = 0;
+
+        function drawCake() {
+            // Clear canvas
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw cake layers (pink gradient)
+            ctx.fillStyle = '#FFB6C1';  // Light pink
+            ctx.fillRect(150, 300, 200, 100);  // Bottom layer
             
-            try {
-                pyodide = await loadPyodide();
-                document.getElementById('status').textContent = "Loading Pygame...";
-                await pyodide.loadPackage(["pygame"]);
+            ctx.fillStyle = '#FFC0CB';  // Pink
+            ctx.fillRect(170, 250, 160, 50);   // Middle layer
+            
+            ctx.fillStyle = '#FFD7D9';  // Lighter pink
+            ctx.fillRect(190, 220, 120, 30);   // Top layer
+
+            // Draw decorative sprinkles
+            for (let i = 0; i < 20; i++) {
+                ctx.beginPath();
+                const x = Math.random() * 200 + 150;
+                const y = Math.random() * 180 + 220;
+                ctx.fillStyle = ['white', '#FF69B4', '#FFE4E1'][Math.floor(Math.random() * 3)];
+                ctx.arc(x, y, 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Draw candle
+            ctx.fillStyle = '#FFB6C1';
+            ctx.fillRect(240, 170, 20, 50);
+            
+            // Draw flame if candle is lit
+            if (candleLit) {
+                flameOffset = Math.sin(Date.now() * 0.01) * 3;
                 
-                document.getElementById('status').textContent = "Loading game...";
-                await pyodide.runPythonAsync(`
-                    from pyodide.http import pyfetch
-                    response = await pyfetch("blow_candle.py")
-                    with open("blow_candle.py", "w") as f:
-                        f.write(await response.text())
-                `);
+                // Outer flame
+                ctx.fillStyle = '#FFA500';
+                ctx.beginPath();
+                ctx.ellipse(250, 140 + flameOffset, 20, 20, 0, 0, Math.PI * 2);
+                ctx.fill();
                 
-                document.getElementById('status').textContent = "Starting game...";
-                await pyodide.runPythonAsync(`
-                    import blow_candle
-                    await blow_candle.main()
-                `);
-                
-                document.getElementById('status').textContent = "Game ready!";
-            } catch (error) {
-                console.error("Error:", error);
-                document.getElementById('status').textContent = "Error loading game: " + error.message;
+                // Inner flame
+                ctx.fillStyle = '#FFD700';
+                ctx.beginPath();
+                ctx.ellipse(250, 145 + flameOffset, 15, 15, 0, 0, Math.PI * 2);
+                ctx.fill();
             }
         }
 
-        async function blowCandle() {
-            try {
-                await pyodide.runPythonAsync(`
-                    import pygame
-                    pygame.event.post(pygame.event.Event(pygame.MOUSEBUTTONDOWN))
-                `);
-            } catch (error) {
-                console.error("Error blowing candle:", error);
-            }
+        function blowOutCandle() {
+            candleLit = false;
+            // Show celebration message
+            ctx.fillStyle = '#FF1493';
+            ctx.font = '36px Arial';
+            ctx.fillText('Happy Birthday! 🎉', 150, 150);
         }
 
-        init();
+        // Animation loop
+        function animate() {
+            drawCake();
+            requestAnimationFrame(animate);
+        }
+
+        // Start the animation
+        animate();
+
+        // Add background music
+        const audio = new Audio('data:audio/mp3;base64,' + 
+            'SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAAFKgDMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzM//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAAAQUqxQ8xCQAAAAAAAAAAAAAAAAAAAP/7kGQAAANUAEn1AAAIxoBJPqAAAQAAAaQAAAAgAAA0gAAABAAABpAAAACAAADSAAAAEMXDms33Dg4ODg4vqx8fH+Dg4Pj/B8H4Ph8H4f4Pg+D4Pw+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+AAH4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4Pg+D4');
+        
+        audio.loop = true;
+        
+        // Play music when user interacts
+        document.addEventListener('click', () => {
+            audio.play().catch(e => console.log('Audio play failed:', e));
+        }, { once: true });
     </script>
 </body>
-</html> 
+</html>
