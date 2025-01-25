@@ -4,6 +4,8 @@ import numpy as np
 import asyncio
 import platform
 import sys
+import io
+import base64
 
 print("Game is loading...")
 
@@ -24,6 +26,11 @@ else:
 
 pygame.display.set_caption("Blow Out the Candle!")
 clock = pygame.time.Clock()
+
+# Add this constant after the imports and constants
+BIRTHDAY_MUSIC = base64.b64decode("""
+    {{ I'll provide this data in the next message for better readability }}
+""")
 
 # Function to draw the cake and candle
 def draw_cake(screen, candle_lit):
@@ -104,16 +111,28 @@ async def request_microphone_permission():
         return False
 
 
+# Add this function after the imports and constants
+def init_music():
+    try:
+        if not IS_WEB:  # Only initialize music for desktop version
+            pygame.mixer.init()
+            music_file = io.BytesIO(BIRTHDAY_MUSIC)
+            pygame.mixer.music.load(music_file)
+            pygame.mixer.music.play(-1)  # -1 means loop forever
+    except Exception as e:
+        print(f"Error loading music: {e}")
+
+
 # Main function to run the program
 async def main():
     print("Main function started...")
+    init_music()  # Initialize and start the music
     clock = pygame.time.Clock()
     candle_lit = True
     running = True
 
     while running:
         if IS_WEB:
-            # Web-specific event handling
             events = pygame.event.get()
             for event in events:
                 if event.type == pygame.QUIT:
@@ -121,13 +140,15 @@ async def main():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     candle_lit = False
                     print("Candle blown out by click!")
+                    if not IS_WEB:
+                        pygame.mixer.music.stop()  # Stop music when candle is blown out
         else:
-            # Desktop event handling
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     candle_lit = False
+                    pygame.mixer.music.stop()  # Stop music when candle is blown out
 
         # Draw the cake
         draw_cake(screen, candle_lit)
